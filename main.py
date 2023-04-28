@@ -2,6 +2,8 @@ import os
 import sys
 import pypdf
 import logging
+import datetime
+import shutil
 from dataclasses import dataclass
 
 
@@ -34,44 +36,101 @@ def get_base_dir():
 
 @dataclass
 class Document:
-    "Class representing any file to scan"
+    "Class representing file of any extension to scan"
     path: str
 
+    def __post_init__(self):
+        self.texts = []
+        self.filters_dict = {}
 
-@dataclass
+    def _set_filters_dict(self, filters):
+        for filter in filters:
+            self.filters_dict[filter] = False
+
+    def passes_filters(self, filters):
+        self._set_filters_dict(filters)
+        for text in self.texts:
+            for filter in filters:
+                if filter in text:
+                    self.filters_dict[filter] = True
+        for partial_result in self.filters_dict.values():
+            if partial_result != True:
+                return False
+        return True
+
+    def get_path(self):
+        return self.path
+
+    def get_texts(self):
+        return self.texts
+
+
 class PdfDoc(Document):
     "Class representing Pdf file to scan"
 
-    # https://stackoverflow.com/questions/51199031/python-3-dataclass-initialization
-    def __post_init__(self):
+    def __init__(self, path):
+        super().__init__(path)
         self.reader = pypdf.PdfReader(self.path)
-        self.texts = []
         for page in self.reader.pages:
             this_text = page.extract_text()
-            self.texts.append(this_text)
+            # Each item of self.texts holds the text of a full page
+            self.texts.append(this_text.lower())
 
 
 @dataclass
 class DocMgr:
     base_dir: str
 
-    def import_docs(self):
+    def __post_init__(self):
+        self.docs = []
+        self.filters = []
+        self.passed_list = []
+        self.input_dir = os.path.join(self.base_dir, "input")
+        self.filter_path = os.path.join(self.base_dir, "filters.txt")
+
+    def _import_docs(self):
         """Imports documents from input dir"""
-        self.pdfs = []
-        self.words = []
-        input_dir = os.path.join(self.base_dir, "input")
-        for root, dirs, files in os.walk(input_dir):
+        for root, dirs, files in os.walk(self.input_dir):
             for file in files:
                 file_path = os.path.join(root, file)
                 if file.endswith(".pdf"):
-                    self.pdfs.append(PdfDoc(file_path))
+                    self.docs.append(PdfDoc(file_path))
                 elif file.endswith(".docx"):
                     pass
                 else:
-                    logging.error("Document with unexpected format: %s", file_path)
+                    logging.error("Document with unexpected extension: %s", file_path)
+        logging.debug("A total of %s docs were imported: %s", len(self.docs), self.docs)
+
+    def _import_filters(self):
+        """Imports filters from filters file"""
+        with open(self.filter_path) as file:
+            for line in file:
+                text = line.strip().lower()
+                self.filters.append(text)
+        logging.debug("The following filters were imported: %s", self.filters)
+
+    def _copy_passed_docs(self):
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M_")
+        new_dir = os.path.join(self.base_dir, timestamp + "filtered")
+        os.makedirs(new_dir)
+        new_sub_dir = os.path.join(new_dir, "Passed filters")
+        os.makedirs(new_sub_dir)
+        new_filter_path = os.path.join(new_dir, os.path.basename(self.filter_path))
+        shutil.copy2(self.filter_path, new_filter_path)
+        for passed in self.passed_list:
+            new_doc_path = os.path.join(new_sub_dir, os.path.basename(passed))
+            shutil.copy2(passed, new_doc_path)
+        logging.debug("Docs that passed filters copied to: %s", new_sub_dir)
 
     def filter_docs(self):
         """Copies the docs that pass the filter into a new folder"""
+        self._import_docs()
+        self._import_filters()
+        for doc in self.docs:
+            if doc.passes_filters(self.filters):
+                self.passed_list.append(doc.get_path())
+        logging.debug("A total of %s docs passed the filter", len(self.passed_list))
+        self._copy_passed_docs()
 
 
 if __name__ == "__main__":
@@ -80,6 +139,4 @@ if __name__ == "__main__":
     base_dir = get_base_dir()
     logging.debug("Main folder found at %s", base_dir)
     doc_mgr = DocMgr(base_dir)
-    print(doc_mgr.base_dir)
-    doc_mgr.import_docs()
     doc_mgr.filter_docs()
