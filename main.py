@@ -4,6 +4,7 @@ import pypdf
 import logging
 import datetime
 import shutil
+import docx
 from dataclasses import dataclass
 
 
@@ -77,6 +78,18 @@ class PdfDoc(Document):
             self.texts.append(this_text.lower())
 
 
+class DocxDoc(Document):
+    "Class representing Docx file to scan"
+
+    def __init__(self, path):
+        super().__init__(path)
+        self.reader = docx.Document(self.path)
+        # https://automatetheboringstuff.com/chapter13/
+        for para in self.reader.paragraphs:
+            # Each item of self.texts holds the text of a full paragraph
+            self.texts.append(para.text.lower())
+
+
 @dataclass
 class DocMgr:
     base_dir: str
@@ -96,7 +109,7 @@ class DocMgr:
                 if file.endswith(".pdf"):
                     self.docs.append(PdfDoc(file_path))
                 elif file.endswith(".docx"):
-                    pass
+                    self.docs.append(DocxDoc(file_path))
                 else:
                     logging.error("Document with unexpected extension: %s", file_path)
         logging.debug("A total of %s docs were imported: %s", len(self.docs), self.docs)
