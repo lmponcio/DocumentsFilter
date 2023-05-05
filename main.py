@@ -1,11 +1,17 @@
+"""Script for identifying documents containing specific strings
+"""
+
 import os
 import sys
-import pypdf
 import logging
 import datetime
 import shutil
+import pypdf
 import docx
+import openpyxl
 from dataclasses import dataclass
+from openpyxl.styles import PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 
 
 def log_config():
@@ -41,7 +47,8 @@ class Document:
     path: str
 
     def __post_init__(self):
-        self.texts = []
+        # All text of the document to be contained in a single string
+        self.texts = ""
         self.filters_dict = {}
 
     def _set_filters_dict(self, filters):
@@ -50,12 +57,11 @@ class Document:
 
     def passes_filters(self, filters):
         self._set_filters_dict(filters)
-        for text in self.texts:
-            for filter in filters:
-                if filter in text:
-                    self.filters_dict[filter] = True
+        for filter in filters:
+            if filter in self.texts:
+                self.filters_dict[filter] = True
         for partial_result in self.filters_dict.values():
-            if partial_result != True:
+            if partial_result is not True:
                 return False
         return True
 
@@ -74,8 +80,7 @@ class PdfDoc(Document):
         self.reader = pypdf.PdfReader(self.path)
         for page in self.reader.pages:
             this_text = page.extract_text()
-            # Each item of self.texts holds the text of a full page
-            self.texts.append(this_text.lower())
+            self.texts += " " + this_text.lower()
 
 
 class DocxDoc(Document):
@@ -84,10 +89,13 @@ class DocxDoc(Document):
     def __init__(self, path):
         super().__init__(path)
         self.reader = docx.Document(self.path)
-        # https://automatetheboringstuff.com/chapter13/
         for para in self.reader.paragraphs:
-            # Each item of self.texts holds the text of a full paragraph
-            self.texts.append(para.text.lower())
+            self.texts += " " + para.text.lower()
+        for table in self.reader.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for para in cell.paragraphs:
+                        self.texts += " " + para.text.lower()
 
 
 @dataclass
@@ -98,8 +106,8 @@ class DocMgr:
         self.docs = []
         self.filters = []
         self.passed_list = []
-        self.input_dir = os.path.join(self.base_dir, "input")
-        self.filter_path = os.path.join(self.base_dir, "filters.txt")
+        self.input_dir = os.path.join(self.base_dir, "Files to Filter")
+        self.filter_path = os.path.join(self.base_dir, "Filters.txt")
 
     def _import_docs(self):
         """Imports documents from input dir"""
@@ -122,14 +130,57 @@ class DocMgr:
                 self.filters.append(text)
         logging.debug("The following filters were imported: %s", self.filters)
 
+    def _create_summary_sheet(self, dir):
+        # Workbook and sheets conf
+        wb = openpyxl.Workbook()
+        ws = wb.active
+
+        # Detail sheet
+        ## Build Headers
+        header_file = ws.cell(row=1, column=1, value="File")
+        header_file.fill = PatternFill(start_color="729fcf", fill_type="solid")
+        ws.column_dimensions["A"].width = 35
+        col = 2
+        for filter in self.filters:
+            header_filter = ws.cell(row=1, column=col, value=filter)
+            header_filter.fill = PatternFill(start_color="b4c7dc", fill_type="solid")
+            header_filter.alignment = Alignment(horizontal="center")
+            ws.column_dimensions[get_column_letter(col)].width = 20
+            col += 1
+        ## Fill Records
+        for row in ws.iter_rows(min_row=1, max_row=1, min_col=1):
+            headers = row
+        row = 2
+        for doc in self.docs:
+            for cell in headers:
+                col = cell.column
+                if col == 1:
+                    file_name = os.path.basename(doc.path)
+                    ws.cell(row=row, column=col, value=file_name)
+                else:
+                    filter = ws.cell(row=1, column=col).value
+                    if doc.filters_dict[filter]:
+                        this_cell = ws.cell(row=row, column=col, value="YES")
+                        this_cell.alignment = Alignment(horizontal="center")
+                        this_cell.fill = PatternFill(
+                            start_color="dde8cb", fill_type="solid"
+                        )
+            row += 1
+        wb.save(os.path.join(dir, "Summary.xlsx"))
+
     def _copy_passed_docs(self):
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M_")
+        # Folder structure
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_")
         new_dir = os.path.join(self.base_dir, timestamp + "filtered")
         os.makedirs(new_dir)
-        new_sub_dir = os.path.join(new_dir, "Passed filters")
+        new_sub_dir = os.path.join(new_dir, "Passed")
         os.makedirs(new_sub_dir)
+        # Filters .txt file
         new_filter_path = os.path.join(new_dir, os.path.basename(self.filter_path))
         shutil.copy2(self.filter_path, new_filter_path)
+        # Summary sheet
+        self._create_summary_sheet(new_dir)
+        # Files filtered in subdir
         for passed in self.passed_list:
             new_doc_path = os.path.join(new_sub_dir, os.path.basename(passed))
             shutil.copy2(passed, new_doc_path)
@@ -147,7 +198,8 @@ class DocMgr:
 
 
 if __name__ == "__main__":
-    log_config()
+    if not getattr(sys, "frozen", False):
+        log_config()
     logging.debug("Program started")
     base_dir = get_base_dir()
     logging.debug("Main folder found at %s", base_dir)
