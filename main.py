@@ -9,6 +9,8 @@ import shutil
 import pypdf
 import docx
 import openpyxl
+import tkinter as tk
+import ttk
 from dataclasses import dataclass
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
@@ -39,6 +41,55 @@ def get_base_dir():
     else:
         logging.debug("Running from script")
         return os.path.dirname(os.path.realpath(__file__))
+
+
+class Gui:
+    """Run Button and Progress Bar"""
+
+    # https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
+    def __init__(self):
+        self.tk = tk.Tk(className="Documents Filter")
+        self.tk.geometry("500x200")
+        self.full_bar = 480
+        self.progress = ttk.Progressbar(
+            self.tk, orient=tk.HORIZONTAL, length=self.full_bar, mode="determinate"
+        )
+        self.progress.pack(side=tk.BOTTOM, pady=30)
+
+    def advance(self, percentage):
+        self.progress["value"] = percentage
+        self.tk.update_idletasks()
+
+    def success(self):
+        self.success_label = tk.Label(
+            self.tk, text="Finished", bg="green", fg="white", width="32"
+        )
+        self.success_label.pack(ipady=6)
+
+    def remove_success(self):
+        self.success_label.destroy()
+        self.tk.update_idletasks()
+
+
+def main():
+    gui = Gui()
+    tk.Button(
+        gui.tk, text="Run Filter", command=lambda: run_filter(gui), width="30"
+    ).pack(pady=30)
+    tk.mainloop()
+
+
+def run_filter(gui):
+    gui.advance(0)
+    if hasattr(gui, "success_label"):
+        gui.remove_success()
+    if not getattr(sys, "frozen", False):
+        log_config()
+    logging.debug("Program started")
+    base_dir = get_base_dir()
+    logging.debug("Main folder found at %s", base_dir)
+    doc_mgr = DocMgr(base_dir, gui)
+    doc_mgr.filter_docs()
 
 
 @dataclass
@@ -101,6 +152,7 @@ class DocxDoc(Document):
 @dataclass
 class DocMgr:
     base_dir: str
+    gui: Gui
 
     def __post_init__(self):
         self.docs = []
@@ -181,10 +233,13 @@ class DocMgr:
         # Summary sheet
         self._create_summary_sheet(new_dir)
         # Files filtered in subdir
+        self.gui.advance(70)
         for passed in self.passed_list:
             new_doc_path = os.path.join(new_sub_dir, os.path.basename(passed))
             shutil.copy2(passed, new_doc_path)
         logging.debug("Docs that passed filters copied to: %s", new_sub_dir)
+        self.gui.advance(100)
+        self.gui.success()
 
     def filter_docs(self):
         """Copies the docs that pass the filter into a new folder"""
@@ -194,14 +249,9 @@ class DocMgr:
             if doc.passes_filters(self.filters):
                 self.passed_list.append(doc.get_path())
         logging.debug("A total of %s docs passed the filter", len(self.passed_list))
+        self.gui.advance(30)
         self._copy_passed_docs()
 
 
 if __name__ == "__main__":
-    if not getattr(sys, "frozen", False):
-        log_config()
-    logging.debug("Program started")
-    base_dir = get_base_dir()
-    logging.debug("Main folder found at %s", base_dir)
-    doc_mgr = DocMgr(base_dir)
-    doc_mgr.filter_docs()
+    main()
