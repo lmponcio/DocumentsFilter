@@ -114,9 +114,9 @@ class DocMgr:
         for root, dirs, files in os.walk(self.input_dir):
             for file in files:
                 file_path = os.path.join(root, file)
-                if file.endswith(".pdf"):
+                if file.lower().endswith(".pdf"):
                     self.docs.append(PdfDoc(file_path))
-                elif file.endswith(".docx"):
+                elif file.lower().endswith(".docx"):
                     self.docs.append(DocxDoc(file_path))
                 else:
                     logging.error("Document with unexpected extension: %s", file_path)
