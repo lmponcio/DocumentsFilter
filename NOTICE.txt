@@ -1,0 +1,5 @@
+This project uses the following packages:
+
+- pypdf, see license here: https://github.com/py-pdf/pypdf/blob/main/LICENSE
+- openpyxl, see license here: https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.1/LICENCE.rst
+- python-docx, see license here: https://github.com/python-openxml/python-docx/blob/master/LICENSE
