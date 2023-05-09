@@ -48,7 +48,8 @@ class Gui:
 
     # https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
     def __init__(self):
-        self.tk = tk.Tk(className="Documents Filter")
+        self.tk = tk.Tk()
+        self.tk.title("Documents Filter")
         self.tk.geometry("500x200")
         self.full_bar = 480
         self.progress = ttk.Progressbar(
@@ -80,7 +81,7 @@ def main():
 
 
 def run_filter(gui):
-    gui.advance(0)
+    gui.advance(10)
     if hasattr(gui, "success_label"):
         gui.remove_success()
     if not getattr(sys, "frozen", False):
@@ -89,6 +90,7 @@ def run_filter(gui):
     base_dir = get_base_dir()
     logging.debug("Main folder found at %s", base_dir)
     doc_mgr = DocMgr(base_dir, gui)
+    gui.advance(20)
     doc_mgr.filter_docs()
 
 
@@ -244,12 +246,14 @@ class DocMgr:
     def filter_docs(self):
         """Copies the docs that pass the filter into a new folder"""
         self._import_docs()
+        self.gui.advance(25)
         self._import_filters()
+        self.gui.advance(30)
         for doc in self.docs:
             if doc.passes_filters(self.filters):
                 self.passed_list.append(doc.get_path())
         logging.debug("A total of %s docs passed the filter", len(self.passed_list))
-        self.gui.advance(30)
+        self.gui.advance(35)
         self._copy_passed_docs()
 
 
