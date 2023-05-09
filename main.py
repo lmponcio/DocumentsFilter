@@ -9,8 +9,9 @@ import shutil
 import pypdf
 import docx
 import openpyxl
-import tkinter as tk
 import ttk
+from tkinter import messagebox
+import tkinter as tk
 import webbrowser
 from dataclasses import dataclass
 from openpyxl.styles import PatternFill, Alignment
@@ -177,8 +178,27 @@ class DocMgr:
         self.docs = []
         self.filters = []
         self.passed_list = []
-        self.input_dir = os.path.join(self.base_dir, "Files to Filter")
-        self.filter_path = os.path.join(self.base_dir, "Filters.txt")
+        self.input_dir_basename = "Files to Filter"
+        self.input_dir = os.path.join(self.base_dir, self.input_dir_basename)
+        self.filter_filename = "Filters.txt"
+        self.filter_path = os.path.join(self.base_dir, self.filter_filename)
+        self._check_setup()
+
+    def _check_setup(self):
+        if not os.path.exists(self.input_dir):
+            logging.error("No input dir found at %s", self.input_dir)
+            messagebox.showerror(
+                title="Error",
+                message=f'The program can\'t find the "{self.input_dir_basename}" folder.\n\nLocate "{self.input_dir_basename}" folder in the same folder as the program file and try again.\n\nDouble-check the folder name\'s spelling.',
+            )
+            sys.exit()
+        if not os.path.exists(self.filter_path):
+            logging.error("No filters file found at %s", self.filter_path)
+            messagebox.showerror(
+                title="Error",
+                message=f'The program can\'t find "{self.filter_filename}".\n\nLocate "{self.filter_filename}" in the same folder as the program file and try again.\n\nDouble-check the file name\'s spelling.',
+            )
+            sys.exit()
 
     def _import_docs(self):
         """Imports documents from input dir"""
