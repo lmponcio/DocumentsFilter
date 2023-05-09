@@ -44,14 +44,16 @@ def get_base_dir():
         logging.debug("Running from script")
         return os.path.dirname(os.path.realpath(__file__))
 
-
+@dataclass
 class Gui:
     """Run Button and Progress Bar"""
+    base_dir : str
 
-    def __init__(self):
+    def __post_init__(self):
         self.tk = tk.Tk()
         self.tk.title("Documents Filter")
         self.tk.geometry("500x250")
+        self.tk.iconbitmap(default=os.path.join(self.base_dir, "logo.ico"))
         self.full_bar = 480
         self.source_label = tk.Label(
             self.tk,
@@ -87,7 +89,11 @@ class Gui:
 
 
 def main():
-    gui = Gui()
+    if not getattr(sys, "frozen", False):
+        log_config()
+    logging.debug("Program started")
+    base_dir = get_base_dir()
+    gui = Gui(base_dir)
     tk.Button(
         gui.tk,
         text="Run Filter",
@@ -102,10 +108,7 @@ def run_filter(gui):
     gui.advance(10)
     if hasattr(gui, "success_label"):
         gui.remove_success()
-    if not getattr(sys, "frozen", False):
-        log_config()
-    logging.debug("Program started")
-    base_dir = get_base_dir()
+    base_dir = gui.base_dir
     logging.debug("Main folder found at %s", base_dir)
     doc_mgr = DocMgr(base_dir, gui)
     gui.advance(20)
