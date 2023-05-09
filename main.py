@@ -11,6 +11,7 @@ import docx
 import openpyxl
 import tkinter as tk
 import ttk
+import webbrowser
 from dataclasses import dataclass
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
@@ -46,12 +47,24 @@ def get_base_dir():
 class Gui:
     """Run Button and Progress Bar"""
 
-    # https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
     def __init__(self):
         self.tk = tk.Tk()
         self.tk.title("Documents Filter")
-        self.tk.geometry("500x200")
+        self.tk.geometry("500x250")
         self.full_bar = 480
+        self.source_label = tk.Label(
+            self.tk,
+            text="See the code at github.com/lmponcio",
+            cursor="hand1",
+            font=("Courier", 8),
+        )
+        self.source_label.bind(
+            "<Button-1>",
+            lambda x: webbrowser.open_new(
+                "https://github.com/lmponcio/DocumentsFilter"
+            ),
+        )
+        self.source_label.pack(side=tk.BOTTOM, pady=5)
         self.progress = ttk.Progressbar(
             self.tk, orient=tk.HORIZONTAL, length=self.full_bar, mode="determinate"
         )
@@ -63,9 +76,9 @@ class Gui:
 
     def success(self):
         self.success_label = tk.Label(
-            self.tk, text="Finished", bg="green", fg="white", width="32"
+            self.tk, text="Finished!", bg="green", fg="white", width="32", height="2"
         )
-        self.success_label.pack(ipady=6)
+        self.success_label.pack(side=tk.BOTTOM)
 
     def remove_success(self):
         self.success_label.destroy()
@@ -75,8 +88,12 @@ class Gui:
 def main():
     gui = Gui()
     tk.Button(
-        gui.tk, text="Run Filter", command=lambda: run_filter(gui), width="30"
-    ).pack(pady=30)
+        gui.tk,
+        text="Run Filter",
+        command=lambda: run_filter(gui),
+        width="30",
+        height="2",
+    ).pack(side=tk.TOP, pady=30)
     tk.mainloop()
 
 
