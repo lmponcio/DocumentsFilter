@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
+__version__="v0.1"
 
 def log_config():
     """Performs a logging basic setup"""
@@ -51,7 +52,7 @@ class Gui:
 
     def __post_init__(self):
         self.tk = tk.Tk()
-        self.tk.title("Documents Filter")
+        self.tk.title("Documents Filter "+__version__)
         self.tk.geometry("500x250")
         self.tk.iconbitmap(default=os.path.join(self.base_dir, "logo.ico"))
         self.full_bar = 480
@@ -96,7 +97,7 @@ def main():
     gui = Gui(base_dir)
     tk.Button(
         gui.tk,
-        text="Run Filter",
+        text="Run Filters",
         command=lambda: run_filter(gui),
         width="30",
         height="2",
