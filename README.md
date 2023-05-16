@@ -4,7 +4,7 @@ A script for identifying documents containing specific strings
 
 ## Learn to use it
 
-[![Watch Video](https://img.youtube.com/vi/placeHolderVideoId/0.jpg)](https://www.youtube.com/watch?v=placeHolderVideoId)
+[![Watch Video](https://img.youtube.com/vi/h8_KjkikC6U/0.jpg)](https://www.youtube.com/watch?v=h8_KjkikC6U)
 
 ## Important information
 - The only document formats checked are [DOCX (**not DOC**)](https://www.howtogeek.com/304622/WHAT-IS-A-.DOCX-FILE-AND-HOW-IS-IT-DIFFERENT-FROM-A-.DOC-FILE-IN-MICROSOFT-WORD/) and PDF. If files to folder contains files with other extensions (DOC, JPEG, CSV, TXT, etc.) they will be ignored. This could change in future releases.
