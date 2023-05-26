@@ -4,7 +4,7 @@ A script for identifying documents containing specific strings
 
 ## Learn to use it
 
-DocumentsFilter can be use for many different purposes. One purpose I thought could be useful for is filtering resumes. Please see below a video where the script is used for screening a big amount of resumes.
+DocumentsFilter can be used for many different purposes. One purpose I thought could be useful for is filtering resumes. Please see below a video where the script is used for screening a big amount of resumes.
 
 [![Watch Video](https://img.youtube.com/vi/h8_KjkikC6U/0.jpg)](https://www.youtube.com/watch?v=h8_KjkikC6U)
 
