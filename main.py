@@ -6,18 +6,19 @@ import sys
 import logging
 import datetime
 import shutil
+import ttk
 import pypdf
 import docx
 import openpyxl
-import ttk
-from tkinter import messagebox
-import tkinter as tk
 import webbrowser
+import tkinter as tk
 from dataclasses import dataclass
+from tkinter import messagebox
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
-__version__="v0.1"
+__version__ = "v0.1"
+
 
 def log_config():
     """Performs a logging basic setup"""
@@ -45,14 +46,16 @@ def get_base_dir():
         logging.debug("Running from script")
         return os.path.dirname(os.path.realpath(__file__))
 
+
 @dataclass
 class Gui:
     """Run Button and Progress Bar"""
-    base_dir : str
+
+    base_dir: str
 
     def __post_init__(self):
         self.tk = tk.Tk()
-        self.tk.title("Documents Filter "+__version__)
+        self.tk.title("Documents Filter " + __version__)
         self.tk.geometry("500x250")
         self.tk.iconbitmap(default=os.path.join(self.base_dir, "logo.ico"))
         self.full_bar = 480
