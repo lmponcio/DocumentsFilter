@@ -4,7 +4,7 @@ A script for identifying documents containing specific strings
 
 ## UML Class Diagram
 
-The script has been written thinking of adding more Document types in the future. The GUI was added at the end and probably there is a need to refactor how it interacts with the implementation.
+The script has been written thinking of adding more Document subclasses in the future. The GUI was added at the end and probably there is a need to refactor how it interacts with the implementation.
 
 <img src="./media/diagram.jpg" width="300" />
 
