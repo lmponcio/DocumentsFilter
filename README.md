@@ -13,6 +13,11 @@ Please see below an screenshot of the application user interface
 
 <img src="./media/DocumentsFilter-screenshot.jpg" width="700" />
 
+## Output spreadsheet
+Please find below a screenshot of the output spreadsheet generated when running DocumentsFilter to analyse 200 resumes.
+
+<img src="./media/output_spreadsheet.jpg" width="700" />
+
 ## How to use it
 
 ### Using the executable file (easy way)
