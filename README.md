@@ -54,8 +54,8 @@ DocumentsFilter can be used for many different purposes. One purpose I thought c
 ## Acknowledgments
 DocumentsFilter is a Python code that uses external libraries to do its job. Special thanks to the mantainers of  [python-docx](https://github.com/python-openxml/python-docx), [pypdf](https://github.com/py-pdf/pypdf) and [openpyxl](https://foss.heptapod.net/openpyxl/openpyxl).
 
-## Bibliography
+## Resources
 - Logo created using [Canva](https://www.canva.com/)
 - UML Class Diagram created using http://draw.io/
-- Learned UML/OOP at [The Object-Oriented Thought Process by Matt Weisfeld](https://www.google.com.au/books/edition/The_Object_Oriented_Thought_Process/pxK0hSuDyX0C?hl=en&gbpv=1&dq=The+Object-Oriented+Thought+Process&printsec=frontcover)
+- UML/OOP following [The Object-Oriented Thought Process by Matt Weisfeld](https://www.google.com.au/books/edition/The_Object_Oriented_Thought_Process/pxK0hSuDyX0C?hl=en&gbpv=1&dq=The+Object-Oriented+Thought+Process&printsec=frontcover)
 - https://www.visual-paradigm.com/guide/uml-unified-modeling-language/uml-aggregation-vs-composition/
