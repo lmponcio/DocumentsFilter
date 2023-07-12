@@ -57,7 +57,8 @@ class Gui:
         self.tk = tk.Tk()
         self.tk.title("Documents Filter " + __version__)
         self.tk.geometry("500x250")
-        self.tk.iconbitmap(default=os.path.join(self.base_dir, "logo.ico"))
+        # TODO: handle so in linux it doesn't crash
+        # self.tk.iconbitmap(default=os.path.join(self.base_dir, "logo.ico"))
         self.full_bar = 480
         self.source_label = tk.Label(
             self.tk,
@@ -150,6 +151,17 @@ class Document:
         return self.texts
 
 
+class TextDoc(Document):
+    "Class representing Pdf file to scan"
+
+    def __init__(self, path):
+        super().__init__(path)
+        with open(self.path) as file:
+            for line in file:
+                this_text = line.strip()
+                self.texts += " " + this_text.lower()
+
+
 class PdfDoc(Document):
     "Class representing Pdf file to scan"
 
@@ -217,7 +229,10 @@ class DocMgr:
                 elif file.lower().endswith(".docx"):
                     self.docs.append(DocxDoc(file_path))
                 else:
-                    logging.error("Document with unexpected extension: %s", file_path)
+                    try:
+                        self.docs.append(TextDoc(file_path))
+                    except:
+                        logging.error("Document can't be red as text: %s", file_path)
         logging.debug("A total of %s docs were imported: %s", len(self.docs), self.docs)
 
     def _import_filters(self):
