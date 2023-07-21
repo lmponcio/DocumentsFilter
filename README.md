@@ -45,7 +45,7 @@ DocumentsFilter can be used for many different purposes. One purpose I thought c
 [![Watch Video](https://img.youtube.com/vi/h8_KjkikC6U/0.jpg)](https://www.youtube.com/watch?v=h8_KjkikC6U)
 -->
 ## Important information
-- DocumentsFilter checks [DOCX (**not DOC**)](https://www.howtogeek.com/304622/WHAT-IS-A-.DOCX-FILE-AND-HOW-IS-IT-DIFFERENT-FROM-A-.DOC-FILE-IN-MICROSOFT-WORD/) and PDF files. If files with other extensions are provided (DOC, JPEG, CSV, TXT, etc.) they will be ignored. This could change in future releases.
+- DocumentsFilter checks [DOCX (**not DOC**)](https://www.howtogeek.com/304622/WHAT-IS-A-.DOCX-FILE-AND-HOW-IS-IT-DIFFERENT-FROM-A-.DOC-FILE-IN-MICROSOFT-WORD/) and PDF files. If files with other extensions are provided (DOC, JPEG, CSV, etc.) they will be ignored. This could change in future releases.
 - The filters are not case-sensitive (if you write "Excel" or "excel" in Filters.txt it has the same effect). The script transforms both the filters and the documents content to lowercase, and checks if the  lower-cased filters are contained in the lower-cased documents content.
 - DocumentsFilter is not 100% accurate - It's quite accurate, but not perfect. For more information check the libraries used for scanning the ".docx" files ([python-docx](https://github.com/python-openxml/python-docx)) and the ".pdf" files ([pypdf](https://github.com/py-pdf/pypdf)).
 - Images are not checked, only text. In the future I might add optical character recognition so text in images is also checked, but for now it is only checking text elements.
